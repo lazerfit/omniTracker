@@ -1,0 +1,32 @@
+import { IconBell } from '@tabler/icons-react';
+import AvatarDropdown from '@/components/buttons/AvatarDropdown';
+import Link from 'next/link';
+
+const Header = () => {
+  return (
+    <header className="h-14 w-full p-8 py-10">
+      <div className="flex h-full w-full items-center justify-between">
+        <Link href={'/'}>LOGO</Link>
+        <nav className="flex gap-2 rounded-full p-1">
+          <button className="flex cursor-pointer items-center justify-center rounded-full p-2">
+            Dashboard
+          </button>
+          <button className="flex cursor-pointer items-center justify-center rounded-full p-2">
+            Stock
+          </button>
+          <button className="flex cursor-pointer items-center justify-center rounded-full p-2">
+            Crypto
+          </button>
+        </nav>
+        <div className="bg-card flex gap-2 rounded-full p-1">
+          <button className="bg-background flex h-8 w-8 items-center justify-center rounded-full">
+            <IconBell />
+          </button>
+          <AvatarDropdown />
+        </div>
+      </div>
+    </header>
+  );
+};
+
+export default Header;
