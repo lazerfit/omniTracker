@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import Header from './layout/Header';
+import Sidebar from './layout/Sidebar';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -26,12 +27,17 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} bg-background text-foreground flex h-dvh w-full flex-col antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} bg-background text-foreground flex h-dvh w-full antialiased`}
       >
-        <Header />
-        <main className="flex h-full w-full items-center justify-center overflow-auto p-8 pt-4">
-          {children}
-        </main>
+        <div>
+          <Sidebar />
+        </div>
+        <div className="flex h-full w-full flex-col">
+          <Header />
+          <main className="bg-card flex h-full w-full items-center justify-center overflow-auto rounded-tl-4xl rounded-bl-4xl p-8 pt-4">
+            {children}
+          </main>
+        </div>
       </body>
     </html>
   );

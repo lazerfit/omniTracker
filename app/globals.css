@@ -1,7 +1,6 @@
 @import 'normalize.css';
 @import 'tailwindcss';
 @import 'tw-animate-css';
-@import 'shadcn/tailwind.css';
 
 @theme inline {
   --spacing: 4px;
@@ -45,37 +44,62 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--border, currentColor);
+  }
+}
+
 :root {
-  --radius: 0.625rem;
-  --background: #1e201e;
-  --foreground: #f8fafc;
-  --card: #ecdfcc;
-  --card-foreground: #1e201e;
-  --popover: #0f0d0e;
-  --popover-foreground: #f8fafc;
+  /* Layout & Base */
+  --radius: 0.75em;
+  --background: #f4f6f8;
+  --foreground: #212529;
+
+  /* Card System */
+  --card: #ffffff;
+  --card-foreground: #212529;
+
+  /* Overlays (Popover, Tooltip) */
+  --popover: #ffffff;
+  --popover-foreground: #212529;
+
+  /* Brand & Actions */
   --primary: #697565;
   --primary-foreground: #f8fafc;
-  --secondary: #3c3d37;
-  --secondary-foreground: #f8fafc;
-  --muted: #161415;
-  --muted-foreground: #94a3b8;
-  --accent: #697565;
-  --accent-foreground: #f8fafc;
-  --destructive: #ef4444;
-  --border: #f8fafc;
-  --input: #161415;
-  --ring: #fb6a4c;
-  --chart-1: #22c55e;
-  --chart-2: #ef4444;
-  --chart-3: #fb6a4c;
-  --chart-4: #82aaf2;
-  --chart-5: #e281b1;
-  --sidebar: #050304;
-  --sidebar-foreground: #f8fafc;
-  --sidebar-primary: #fb6a4c;
+  --secondary: #eaeef2;
+  --secondary-foreground: #212529;
+
+  /* Accents & States */
+  --accent: #007bff;
+  --accent-foreground: #ffffff;
+  --muted: #f1f3f5;
+  --muted-foreground: #6c757d;
+
+  /* Feedback & Validation */
+  --destructive: #dc3545;
+  --border: #e1e5e9;
+  --input: #ffffff;
+  --ring: #007bff;
+
+  /* Charts (시인성 개선) */
+  --chart-1: #007bff;
+  --chart-2: #697565;
+  --chart-3: #adb5bd;
+  --chart-4: #6f42c1;
+  --chart-5: #fd7e14;
+
+  /* Sidebar (Main UI와 조화롭게 변경) */
+  --sidebar: #ffffff;
+  --sidebar-foreground: #212529;
+  --sidebar-primary: #007bff;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #1a1a1b;
-  --sidebar-accent-foreground: #fb6a4c;
-  --sidebar-border: #242122;
-  --sidebar-ring: #fb6a4c;
+  --sidebar-accent: #f8f9fa;
+  --sidebar-accent-foreground: #007bff;
+  --sidebar-border: #e9ecef;
+  --sidebar-ring: #007bff;
 }

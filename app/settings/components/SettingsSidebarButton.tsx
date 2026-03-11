@@ -8,7 +8,13 @@ interface Props extends React.ComponentProps<'button'> {
 
 const SettingsSidebarButton = ({ className, children, ...props }: Props) => {
   return (
-    <button className={cn('hover:bg-accent w-full rounded-lg border p-2', className)} {...props}>
+    <button
+      className={cn(
+        'hover:bg-card hover:text-card-foreground flex w-full cursor-pointer justify-start rounded-lg border p-2 pl-8',
+        className
+      )}
+      {...props}
+    >
       {children}
     </button>
   );
