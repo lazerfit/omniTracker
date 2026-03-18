@@ -1,46 +1,51 @@
 import { createHmac } from 'crypto';
 
-interface BinanceBalance {
-  asset: string;
-  free: string;
-  locked: string;
+interface SnapshotData {
+  totalAssetOfBtc: string;
 }
 
-interface BinanceAccountResponse {
-  balances: BinanceBalance[];
+interface SnapshotVo {
+  data: SnapshotData;
+  updateTime: number;
 }
 
-const STABLECOINS = new Set(['USDT', 'BUSD', 'USDC']);
+interface AccountSnapshotResponse {
+  code: number;
+  msg: string;
+  snapshotVos: SnapshotVo[];
+}
+
+interface TickerPriceResponse {
+  symbol: string;
+  price: string;
+}
 
 export async function getBinanceBalance(apiKey: string, apiSecret: string): Promise<number> {
   const timestamp = Date.now();
-  const queryString = `timestamp=${timestamp}`;
-
+  const queryString = `type=SPOT&limit=1&timestamp=${timestamp}`;
   const signature = createHmac('sha256', apiSecret).update(queryString).digest('hex');
 
-  const url = `https://api.binance.com/api/v3/account?${queryString}&signature=${signature}`;
+  const [snapshotRes, btcPriceRes] = await Promise.all([
+    fetch(`https://api.binance.com/sapi/v1/accountSnapshot?${queryString}&signature=${signature}`, {
+      headers: { 'X-MBX-APIKEY': apiKey },
+    }),
+    fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT'),
+  ]);
 
-  const response = await fetch(url, {
-    headers: {
-      'X-MBX-APIKEY': apiKey,
-    },
-  });
-
-  if (!response.ok) {
-    const text = await response.text();
-    throw new Error(`Binance API error ${response.status}: ${text}`);
+  if (!snapshotRes.ok) {
+    const text = await snapshotRes.text();
+    throw new Error(`Binance accountSnapshot error ${snapshotRes.status}: ${text}`);
+  }
+  if (!btcPriceRes.ok) {
+    const text = await btcPriceRes.text();
+    throw new Error(`Binance ticker/price error ${btcPriceRes.status}: ${text}`);
   }
 
-  const data = (await response.json()) as BinanceAccountResponse;
+  const snapshot = (await snapshotRes.json()) as AccountSnapshotResponse;
+  const ticker = (await btcPriceRes.json()) as TickerPriceResponse;
 
-  // TODO: implement full USD conversion using /api/v3/ticker/price for all assets
-  // For now, only stablecoin balances (USDT, BUSD, USDC) are used as a USD proxy
-  let total = 0;
-  for (const balance of data.balances) {
-    if (STABLECOINS.has(balance.asset)) {
-      total += parseFloat(balance.free) + parseFloat(balance.locked);
-    }
-  }
+  const totalBtc = parseFloat(snapshot.snapshotVos[0]?.data.totalAssetOfBtc ?? '0');
+  const btcUsdt = parseFloat(ticker.price);
 
-  return total;
+  return totalBtc * btcUsdt;
 }

@@ -53,16 +53,24 @@ describe('takeSnapshot', () => {
       ],
     );
 
-    const fetchMock = mock(() =>
-      Promise.resolve(
-        new Response(
-          JSON.stringify({
-            balances: [{ asset: 'USDT', free: '500', locked: '0' }],
-          }),
-          { status: 200 },
-        ),
-      ),
-    );
+    const fetchMock = mock((url: string) => {
+      if ((url as string).includes('accountSnapshot')) {
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({
+              code: 200,
+              msg: '',
+              snapshotVos: [{ data: { totalAssetOfBtc: '0.01' }, updateTime: Date.now() }],
+            }),
+            { status: 200 },
+          ),
+        );
+      }
+      // BTC/USDT price
+      return Promise.resolve(
+        new Response(JSON.stringify({ symbol: 'BTCUSDT', price: '50000' }), { status: 200 }),
+      );
+    });
     global.fetch = fetchMock as unknown as typeof fetch;
 
     await takeSnapshot();

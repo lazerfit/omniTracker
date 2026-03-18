@@ -2,6 +2,14 @@ import { afterEach, beforeAll, describe, expect, it, mock } from 'bun:test';
 
 process.env.ENCRYPTION_KEY = 'a'.repeat(64);
 
+const SNAPSHOT_RESPONSE = {
+  code: 200,
+  msg: '',
+  snapshotVos: [{ data: { totalAssetOfBtc: '0.5' }, updateTime: Date.now() }],
+};
+
+const BTC_PRICE_RESPONSE = { symbol: 'BTCUSDT', price: '60000' };
+
 describe('getBinanceBalance', () => {
   let getBinanceBalance: (apiKey: string, apiSecret: string) => Promise<number>;
   let originalFetch: typeof global.fetch;
@@ -16,55 +24,49 @@ describe('getBinanceBalance', () => {
     global.fetch = originalFetch;
   });
 
-  it('returns the sum of stablecoin balances (USDT + USDC), excluding non-stablecoins', async () => {
-    const fetchMock = mock(() =>
-      Promise.resolve(
-        new Response(
-          JSON.stringify({
-            balances: [
-              { asset: 'USDT', free: '100', locked: '50' },
-              { asset: 'BTC', free: '0.5', locked: '0' },
-              { asset: 'USDC', free: '200', locked: '0' },
-            ],
-          }),
-          { status: 200 },
-        ),
-      ),
-    );
+  it('returns totalAssetOfBtc * BTC/USDT price', async () => {
+    const fetchMock = mock((url: string) => {
+      if (url.includes('accountSnapshot')) {
+        return Promise.resolve(new Response(JSON.stringify(SNAPSHOT_RESPONSE), { status: 200 }));
+      }
+      return Promise.resolve(new Response(JSON.stringify(BTC_PRICE_RESPONSE), { status: 200 }));
+    });
     global.fetch = fetchMock as unknown as typeof fetch;
 
     const result = await getBinanceBalance('test-key', 'test-secret');
 
-    // USDT: 100 + 50 = 150, USDC: 200 + 0 = 200, BTC excluded → 350
-    expect(result).toBe(350);
+    // 0.5 BTC * $60,000 = $30,000
+    expect(result).toBe(30000);
   });
 
-  it('returns 0 when there are no stablecoin balances', async () => {
-    const fetchMock = mock(() =>
-      Promise.resolve(
-        new Response(
-          JSON.stringify({
-            balances: [{ asset: 'BTC', free: '1', locked: '0' }],
-          }),
-          { status: 200 },
-        ),
-      ),
-    );
+  it('returns 0 when totalAssetOfBtc is 0', async () => {
+    const emptySnapshot = {
+      ...SNAPSHOT_RESPONSE,
+      snapshotVos: [{ data: { totalAssetOfBtc: '0' }, updateTime: Date.now() }],
+    };
+    const fetchMock = mock((url: string) => {
+      if (url.includes('accountSnapshot')) {
+        return Promise.resolve(new Response(JSON.stringify(emptySnapshot), { status: 200 }));
+      }
+      return Promise.resolve(new Response(JSON.stringify(BTC_PRICE_RESPONSE), { status: 200 }));
+    });
     global.fetch = fetchMock as unknown as typeof fetch;
 
     const result = await getBinanceBalance('test-key', 'test-secret');
-
     expect(result).toBe(0);
   });
 
-  it('throws when the API returns a non-200 status', async () => {
-    const fetchMock = mock(() =>
-      Promise.resolve(new Response('Unauthorized', { status: 401 })),
-    );
+  it('throws when accountSnapshot returns a non-200 status', async () => {
+    const fetchMock = mock((url: string) => {
+      if (url.includes('accountSnapshot')) {
+        return Promise.resolve(new Response('Unauthorized', { status: 401 }));
+      }
+      return Promise.resolve(new Response(JSON.stringify(BTC_PRICE_RESPONSE), { status: 200 }));
+    });
     global.fetch = fetchMock as unknown as typeof fetch;
 
     await expect(getBinanceBalance('bad-key', 'bad-secret')).rejects.toThrow(
-      'Binance API error 401',
+      'Binance accountSnapshot error 401',
     );
   });
 });
