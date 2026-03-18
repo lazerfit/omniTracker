@@ -1,5 +1,5 @@
 import { IconBell } from '@tabler/icons-react';
-import AvatarDropdown from '@/components/buttons/AvatarDropdown';
+import AvatarDropdown from '@/components/web/buttons/AvatarDropdown';
 
 const Header = () => {
   return (

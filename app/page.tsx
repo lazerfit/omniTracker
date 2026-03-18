@@ -1,17 +1,13 @@
-import CardPortfolioValue from '@/components/cards/CardPortfolioValue';
-import DashboardLayout from './layout/DashboardLayout';
+import CardBalance from '@/components/web/cards/CardBalance';
+import CardProfit from '@/components/web/cards/CardProfit';
 
 export default function Home() {
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex justify-between gap-4">
-        <DashboardLayout
-          left={<CardPortfolioValue />}
-          main={<div className="border">main</div>}
-          right={<CardPortfolioValue />}
-        />
+    <div className="flex w-full flex-col gap-4">
+      <div className="flex gap-4">
+        <CardBalance />
+        <CardProfit />
       </div>
-      <div className="flex justify-between gap-4"></div>
     </div>
   );
 }

@@ -1,7 +1,7 @@
 'use client';
 
-import SettingsSidebarButton from './components/SettingsSidebarButton';
 import { SettingsTabValue, SETTINGS_TABS } from './constants';
+import { Button } from '@/components/ui/button';
 
 interface SidebarProps {
   activeTab: SettingsTabValue;
@@ -12,16 +12,17 @@ const Sidebar = ({ activeTab, onTabChange }: SidebarProps) => {
   const menuItems = SETTINGS_TABS;
 
   return (
-    <div className="h-full w-64 border-r p-4 md:pr-6">
+    <div className="h-full w-64 rounded-xl border p-4 md:pr-6">
       <nav className="flex w-full flex-col gap-1">
         {menuItems.map((item) => (
-          <SettingsSidebarButton
+          <Button
             key={item.value}
+            className={activeTab === item.value ? 'bg-primary/10' : ''}
+            variant={'ghost'}
             onClick={() => onTabChange(item.value)}
-            className={activeTab === item.value ? 'bg-accent' : ''}
           >
             {item.label}
-          </SettingsSidebarButton>
+          </Button>
         ))}
       </nav>
     </div>

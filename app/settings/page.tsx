@@ -19,10 +19,10 @@ const SettingsPage = () => {
   };
 
   return (
-    <section className="flex h-full w-full justify-center border">
-      <div className="flex h-full w-312 justify-between border md:w-full">
+    <section className="flex h-full w-full items-center justify-center">
+      <div className="flex h-full w-400 justify-center">
         <Sidebar activeTab={activeTab} onTabChange={handleActiveTab} />
-        <div className="h-full w-232 border">
+        <div className="ml-4 h-full w-full rounded-xl border">
           <div className="px-8 py-4">
             <h2 className="text-2xl font-bold capitalize">{activeTab} Settings</h2>
             {SETTINGS_VIEW[activeTab]}

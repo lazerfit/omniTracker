@@ -1,5 +1,9 @@
 const ApiSection = () => {
-  return <div>Api Section</div>;
+  return (
+    <div className="flex flex-col">
+      <div className="flex"></div>
+    </div>
+  );
 };
 
 export default ApiSection;
