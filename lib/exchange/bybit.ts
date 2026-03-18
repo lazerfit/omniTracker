@@ -58,16 +58,20 @@ async function fetchWalletBalance(
 }
 
 export async function getBybitBalance(apiKey: string, apiSecret: string): Promise<number> {
-  const [unified, fund] = await Promise.all([
+  // FUND wallet fetch is non-fatal — some accounts or API keys may not have access
+  const [unified, fundResult] = await Promise.all([
     fetchWalletBalance(apiKey, apiSecret, 'UNIFIED'),
-    fetchWalletBalance(apiKey, apiSecret, 'FUND'),
+    fetchWalletBalance(apiKey, apiSecret, 'FUND').catch((err: Error) => {
+      console.warn('[Bybit] FUND wallet fetch failed (skipped):', err.message);
+      return null;
+    }),
   ]);
 
   // UNIFIED account exposes totalEquity (USD)
   const unifiedTotal = parseFloat(unified.result.list[0]?.totalEquity ?? '0');
 
   // FUND account exposes per-coin usdValue
-  const fundCoins = fund.result.list[0]?.coin ?? [];
+  const fundCoins = fundResult?.result.list[0]?.coin ?? [];
   const fundTotal = fundCoins.reduce((sum, coin) => sum + parseFloat(coin.usdValue ?? '0'), 0);
 
   const total = unifiedTotal + fundTotal;
