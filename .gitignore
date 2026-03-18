@@ -41,3 +41,8 @@ yarn-error.log*
 next-env.d.ts
 
 GEMINI.md
+
+# sqlite
+/data/*.sqlite
+/data/*.sqlite-shm
+/data/*.sqlite-wal

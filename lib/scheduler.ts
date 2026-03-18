@@ -1,12 +1,12 @@
 import cron from 'node-cron';
 
-import { takeSnapshot } from '@/lib/snapshot';
-
 export function startScheduler(): void {
-  // Run every day at 00:00 UTC
+  // takeSnapshot is dynamically imported to prevent Turbopack from statically
+  // bundling bun:sqlite at server startup via the instrumentation hook.
   cron.schedule('0 0 * * *', async () => {
     console.log('[scheduler] Taking portfolio snapshot...');
     try {
+      const { takeSnapshot } = await import('@/lib/snapshot');
       await takeSnapshot();
       console.log('[scheduler] Snapshot complete.');
     } catch (err) {

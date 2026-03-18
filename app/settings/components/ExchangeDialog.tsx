@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useActionState, useState } from 'react';
+import { useFormStatus } from 'react-dom';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -22,17 +23,21 @@ interface ExchangeDialogProps {
   exchange: string;
 }
 
+function SubmitButton() {
+  const { pending } = useFormStatus();
+  return (
+    <Button type="submit" disabled={pending}>
+      {pending ? '저장 중...' : '저장'}
+    </Button>
+  );
+}
+
 export const ExchangeDialog = ({ exchange }: ExchangeDialogProps) => {
   const [open, setOpen] = useState(false);
-  const [isPending, setIsPending] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const data = new FormData(e.currentTarget);
-    const apiKey = data.get('api-key') as string;
-    const apiSecret = data.get('api-secret') as string;
-
-    setIsPending(true);
+  const [, action] = useActionState(async (_: unknown, formData: FormData) => {
+    const apiKey = formData.get('api-key') as string;
+    const apiSecret = formData.get('api-secret') as string;
     try {
       const res = await fetch('/api/exchange-keys', {
         method: 'POST',
@@ -43,10 +48,8 @@ export const ExchangeDialog = ({ exchange }: ExchangeDialogProps) => {
       setOpen(false);
     } catch (err) {
       console.error(err);
-    } finally {
-      setIsPending(false);
     }
-  };
+  }, null);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -60,7 +63,7 @@ export const ExchangeDialog = ({ exchange }: ExchangeDialogProps) => {
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-sm">
-        <form onSubmit={handleSubmit}>
+        <form action={action}>
           <DialogHeader>
             <DialogTitle>{exchange} API 설정</DialogTitle>
             <DialogDescription>{exchange} API 키와 시크릿을 입력하세요.</DialogDescription>
@@ -84,9 +87,7 @@ export const ExchangeDialog = ({ exchange }: ExchangeDialogProps) => {
             <DialogClose asChild>
               <Button variant="outline">취소</Button>
             </DialogClose>
-            <Button type="submit" disabled={isPending}>
-              {isPending ? '저장 중...' : '저장'}
-            </Button>
+            <SubmitButton />
           </DialogFooter>
         </form>
       </DialogContent>
