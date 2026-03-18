@@ -39,5 +39,9 @@ export async function getOkxBalance(apiKey: string, apiSecret: string): Promise<
     return 0;
   }
 
-  return parseFloat(data.data[0].totalEq);
+  const total = parseFloat(data.data[0].totalEq);
+
+  console.log('[OKX]', { totalEq: `$${total}` });
+
+  return total;
 }

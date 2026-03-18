@@ -71,5 +71,14 @@ export async function getBinanceBalance(apiKey: string, apiSecret: string): Prom
   }
 
   const btcUsdt = parseFloat(ticker.price);
-  return (spotBtc + earnBtc) * btcUsdt;
+  const total = (spotBtc + earnBtc) * btcUsdt;
+
+  console.log('[Binance]', {
+    spot: `${spotBtc} BTC`,
+    earn: `${earnBtc} BTC`,
+    btcPrice: `$${btcUsdt}`,
+    total: `$${total}`,
+  });
+
+  return total;
 }
