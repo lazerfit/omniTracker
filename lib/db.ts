@@ -31,8 +31,9 @@ export async function getDb(): Promise<Database> {
     return _db;
   }
 
+  type BunSqliteModule = typeof import('bun:sqlite');
   const bunSqlite = 'bun:sqlite';
-  const { Database: DB } = (await import(/* webpackIgnore: true */ bunSqlite)) as typeof import('bun:sqlite');
+  const { Database: DB } = (await import(/* webpackIgnore: true */ bunSqlite)) as BunSqliteModule;
   const dbPath = process.env.DB_PATH ?? './data/db.sqlite';
   _db = new DB(dbPath, { create: true });
   initDb(_db);
