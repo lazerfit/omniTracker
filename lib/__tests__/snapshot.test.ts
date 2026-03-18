@@ -54,7 +54,7 @@ describe('takeSnapshot', () => {
     );
 
     const fetchMock = mock((url: string) => {
-      if ((url as string).includes('accountSnapshot')) {
+      if (url.includes('accountSnapshot')) {
         return Promise.resolve(
           new Response(
             JSON.stringify({
@@ -64,6 +64,11 @@ describe('takeSnapshot', () => {
             }),
             { status: 200 },
           ),
+        );
+      }
+      if (url.includes('simple-earn')) {
+        return Promise.resolve(
+          new Response(JSON.stringify({ data: { totalAmountInBTC: '0' } }), { status: 200 }),
         );
       }
       // BTC/USDT price

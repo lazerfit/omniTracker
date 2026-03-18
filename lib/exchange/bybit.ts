@@ -1,7 +1,12 @@
 import { createHmac } from 'crypto';
 
+interface BybitCoin {
+  usdValue: string;
+}
+
 interface BybitWalletInfo {
-  totalEquity: string;
+  totalEquity?: string;
+  coin?: BybitCoin[];
 }
 
 interface BybitAccountResponse {
@@ -12,21 +17,26 @@ interface BybitAccountResponse {
   };
 }
 
-export async function getBybitBalance(apiKey: string, apiSecret: string): Promise<number> {
+function sign(secret: string, payload: string): string {
+  return createHmac('sha256', secret).update(payload).digest('hex');
+}
+
+async function fetchWalletBalance(
+  apiKey: string,
+  apiSecret: string,
+  accountType: string,
+): Promise<BybitAccountResponse> {
   const timestamp = Date.now().toString();
   const recvWindow = '5000';
-  const queryString = 'accountType=UNIFIED';
-
-  // HMAC-SHA256(timestamp + apiKey + recvWindow + queryString)
+  const queryString = `accountType=${accountType}`;
   const prehash = `${timestamp}${apiKey}${recvWindow}${queryString}`;
-  const signature = createHmac('sha256', apiSecret).update(prehash).digest('hex');
 
   const response = await fetch(
     `https://api.bybit.com/v5/account/wallet-balance?${queryString}`,
     {
       headers: {
         'X-BAPI-API-KEY': apiKey,
-        'X-BAPI-SIGN': signature,
+        'X-BAPI-SIGN': sign(apiSecret, prehash),
         'X-BAPI-TIMESTAMP': timestamp,
         'X-BAPI-RECV-WINDOW': recvWindow,
       },
@@ -44,5 +54,23 @@ export async function getBybitBalance(apiKey: string, apiSecret: string): Promis
     throw new Error(`Bybit API error: ${data.retMsg}`);
   }
 
-  return parseFloat(data.result.list[0]?.totalEquity ?? '0');
+  return data;
+}
+
+export async function getBybitBalance(apiKey: string, apiSecret: string): Promise<number> {
+  const [unified, fund] = await Promise.all([
+    fetchWalletBalance(apiKey, apiSecret, 'UNIFIED'),
+    fetchWalletBalance(apiKey, apiSecret, 'FUND'),
+  ]);
+
+  // UNIFIED account exposes totalEquity (USD)
+  const unifiedTotal = parseFloat(unified.result.list[0]?.totalEquity ?? '0');
+
+  // FUND account exposes per-coin usdValue
+  const fundTotal = (fund.result.list[0]?.coin ?? []).reduce(
+    (sum, coin) => sum + parseFloat(coin.usdValue ?? '0'),
+    0,
+  );
+
+  return unifiedTotal + fundTotal;
 }
