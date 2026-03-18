@@ -1,3 +1,7 @@
+'use client';
+
+import { useState } from 'react';
+
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -12,41 +16,80 @@ import {
 import { Field, FieldGroup } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { cn } from '@/lib/utils';
 
-const ExchangeDialog = () => {
+interface ExchangeDialogProps {
+  exchange: string;
+}
+
+export const ExchangeDialog = ({ exchange }: ExchangeDialogProps) => {
+  const [open, setOpen] = useState(false);
+  const [isPending, setIsPending] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const data = new FormData(e.currentTarget);
+    const apiKey = data.get('api-key') as string;
+    const apiSecret = data.get('api-secret') as string;
+
+    setIsPending(true);
+    try {
+      const res = await fetch('/api/exchange-keys', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ exchange, apiKey, apiSecret }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      setOpen(false);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsPending(false);
+    }
+  };
+
   return (
-    <Dialog>
-      <form>
-        <DialogTrigger asChild>
-          <Button variant="outline">Open Dialog</Button>
-        </DialogTrigger>
-        <DialogContent className="sm:max-w-sm">
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button
+          variant="ghost"
+          className={cn('h-auto w-full justify-between rounded-xl border p-4', 'hover:bg-accent')}
+        >
+          <span className="text-sm font-medium">{exchange}</span>
+          <span className="text-muted-foreground text-xs">API 미설정</span>
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-sm">
+        <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>Edit profile</DialogTitle>
-            <DialogDescription>
-              Make changes to your profile here. Click save when you&apos;re done.
-            </DialogDescription>
+            <DialogTitle>{exchange} API 설정</DialogTitle>
+            <DialogDescription>{exchange} API 키와 시크릿을 입력하세요.</DialogDescription>
           </DialogHeader>
-          <FieldGroup>
+          <FieldGroup className="py-4">
             <Field>
-              <Label htmlFor="name-1">Name</Label>
-              <Input id="name-1" name="name" defaultValue="Pedro Duarte" />
+              <Label htmlFor="api-key">API Key</Label>
+              <Input id="api-key" name="api-key" placeholder="API Key를 입력하세요" />
             </Field>
             <Field>
-              <Label htmlFor="username-1">Username</Label>
-              <Input id="username-1" name="username" defaultValue="@peduarte" />
+              <Label htmlFor="api-secret">Secret Key</Label>
+              <Input
+                id="api-secret"
+                name="api-secret"
+                type="password"
+                placeholder="Secret Key를 입력하세요"
+              />
             </Field>
           </FieldGroup>
           <DialogFooter>
             <DialogClose asChild>
-              <Button variant="outline">Cancel</Button>
+              <Button variant="outline">취소</Button>
             </DialogClose>
-            <Button type="submit">Save changes</Button>
+            <Button type="submit" disabled={isPending}>
+              {isPending ? '저장 중...' : '저장'}
+            </Button>
           </DialogFooter>
-        </DialogContent>
-      </form>
+        </form>
+      </DialogContent>
     </Dialog>
   );
 };
-
-export default ExchangeDialog;
