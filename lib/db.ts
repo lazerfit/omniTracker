@@ -1,4 +1,4 @@
-import { Database } from 'bun:sqlite';
+import type { Database } from 'bun:sqlite';
 
 let _db: Database | null = null;
 
@@ -26,13 +26,17 @@ function initDb(db: Database): void {
   `);
 }
 
-export function getDb(): Database {
+export async function getDb(): Promise<Database> {
   if (_db) {
     return _db;
   }
 
+  const bunSqlite = 'bun:sqlite';
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore — dynamic import bypasses Next.js require-hook.js patch
+  const { Database: DB } = await import(/* webpackIgnore: true */ bunSqlite);
   const dbPath = process.env.DB_PATH ?? './data/db.sqlite';
-  _db = new Database(dbPath, { create: true });
+  _db = new DB(dbPath, { create: true });
   initDb(_db);
 
   return _db;

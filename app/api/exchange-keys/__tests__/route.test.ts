@@ -3,7 +3,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 const TEST_KEY = 'a'.repeat(64);
 
 describe('GET /api/exchange-keys', () => {
-  let GET: () => import('next/server').NextResponse;
+  let GET: () => Promise<import('next/server').NextResponse>;
 
   beforeAll(async () => {
     process.env.DB_PATH = ':memory:';
@@ -18,7 +18,7 @@ describe('GET /api/exchange-keys', () => {
   });
 
   it('returns 200 with an array', async () => {
-    const response = GET();
+    const response = await GET();
     expect(response.status).toBe(200);
     const body = await response.json();
     expect(Array.isArray(body)).toBe(true);
@@ -38,7 +38,7 @@ describe('GET /api/exchange-keys', () => {
     });
     await POST(request as import('next/server').NextRequest);
 
-    const response = GET();
+    const response = await GET();
     const body = await response.json();
     const entry = body.find((r: { exchange: string }) => r.exchange === 'MaskTest');
     expect(entry).toBeDefined();

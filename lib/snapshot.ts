@@ -14,7 +14,7 @@ interface ExchangeKeyRow {
 }
 
 export async function takeSnapshot(): Promise<void> {
-  const db = getDb();
+  const db = await getDb();
 
   const rows = db
     .query<ExchangeKeyRow, []>(

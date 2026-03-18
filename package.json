@@ -3,15 +3,15 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 3001",
-    "build": "next build",
-    "start": "next start",
+    "dev": "bun --bun next dev -p 3001",
+    "build": "bun --bun next build",
+    "start": "bun --bun next start",
     "lint": "eslint",
     "test": "bun test"
   },
   "dependencies": {
     "@tabler/icons-react": "^3.37.1",
-    "class-variance-authority": "^0.7.1",
+"class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.575.0",
     "next": "16.1.6",

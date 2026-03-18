@@ -1,4 +1,4 @@
-import { afterEach, beforeAll, beforeEach, describe, expect, it, mock } from 'bun:test';
+import { afterEach, beforeAll, beforeEach, describe, expect, it, mock, spyOn } from 'bun:test';
 import type { Database } from 'bun:sqlite';
 
 // Must be set before any module that reads these env vars is imported
@@ -16,7 +16,7 @@ describe('takeSnapshot', () => {
     encrypt = cryptoMod.encrypt;
 
     const dbMod = await import('@/lib/db');
-    db = dbMod.getDb();
+    db = await dbMod.getDb();
 
     const snapshotMod = await import('@/lib/snapshot');
     takeSnapshot = snapshotMod.takeSnapshot;
@@ -82,6 +82,7 @@ describe('takeSnapshot', () => {
   });
 
   it('does not throw when the exchange API call fails (per-exchange error isolation)', async () => {
+    const consoleSpy = spyOn(console, 'error').mockImplementation(() => {});
     const apiKeyEncrypted = encrypt('test-api-key');
     const apiSecretEncrypted = encrypt('test-api-secret');
 
@@ -114,5 +115,6 @@ describe('takeSnapshot', () => {
       .get();
 
     expect(row?.count).toBe(0);
+    consoleSpy.mockRestore();
   });
 });

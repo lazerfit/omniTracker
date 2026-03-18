@@ -1,12 +1,12 @@
 import { getDb } from '@/lib/db';
 import { NextRequest, NextResponse } from 'next/server';
 
-export function DELETE(
+export async function DELETE(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
-): NextResponse {
+): Promise<NextResponse> {
   const { id } = params as unknown as { id: string };
-  const db = getDb();
+  const db = await getDb();
 
   const existing = db
     .query<{ id: number }, [string]>('SELECT id FROM exchange_keys WHERE id = ?')

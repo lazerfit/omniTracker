@@ -8,8 +8,8 @@ interface ExchangeKeyRow {
   created_at: string;
 }
 
-export function GET(): NextResponse {
-  const db = getDb();
+export async function GET(): Promise<NextResponse> {
+  const db = await getDb();
   const rows = db
     .query<ExchangeKeyRow, []>(
       'SELECT id, exchange, created_at FROM exchange_keys ORDER BY created_at DESC',
@@ -54,7 +54,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     apiSecret: encryptedApiSecret.authTag,
   });
 
-  const db = getDb();
+  const db = await getDb();
   const result = db
     .query<{ id: number; created_at: string }, [string, string, string, string, string]>(
       `INSERT INTO exchange_keys (exchange, api_key, api_secret, iv, auth_tag)
