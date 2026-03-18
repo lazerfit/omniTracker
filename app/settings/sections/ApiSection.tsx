@@ -1,6 +1,6 @@
 import { ExchangeDialog } from '@/app/settings/components/ExchangeDialog';
 
-const EXCHANGES = ['Binance', 'Bitget', 'OKX'];
+const EXCHANGES = ['Binance', 'Bybit', 'Bitget', 'OKX'];
 
 const ApiSection = () => {
   return (

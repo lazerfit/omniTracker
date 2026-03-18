@@ -2,6 +2,7 @@ import { decrypt } from '@/lib/crypto';
 import { getDb } from '@/lib/db';
 import { getBinanceBalance } from '@/lib/exchange/binance';
 import { getBitgetBalance } from '@/lib/exchange/bitget';
+import { getBybitBalance } from '@/lib/exchange/bybit';
 import { getOkxBalance } from '@/lib/exchange/okx';
 import { NextResponse } from 'next/server';
 
@@ -43,6 +44,8 @@ export async function GET(): Promise<NextResponse> {
 
         if (exchange === 'binance') {
           balance = await getBinanceBalance(apiKey, apiSecret);
+        } else if (exchange === 'bybit') {
+          balance = await getBybitBalance(apiKey, apiSecret);
         } else if (exchange === 'bitget') {
           balance = await getBitgetBalance(apiKey, apiSecret);
         } else if (exchange === 'okx') {

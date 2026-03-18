@@ -2,6 +2,7 @@ import { decrypt } from '@/lib/crypto';
 import { getDb } from '@/lib/db';
 import { getBinanceBalance } from '@/lib/exchange/binance';
 import { getBitgetBalance } from '@/lib/exchange/bitget';
+import { getBybitBalance } from '@/lib/exchange/bybit';
 import { getOkxBalance } from '@/lib/exchange/okx';
 
 interface ExchangeKeyRow {
@@ -17,13 +18,14 @@ export async function takeSnapshot(): Promise<void> {
   const db = await getDb();
 
   const rows = db
-    .query<ExchangeKeyRow, []>(
-      'SELECT id, exchange, api_key, api_secret, iv, auth_tag FROM exchange_keys',
-    )
+    .query<
+      ExchangeKeyRow,
+      []
+    >('SELECT id, exchange, api_key, api_secret, iv, auth_tag FROM exchange_keys')
     .all();
 
   const insertSnapshot = db.query<void, [string, number, string]>(
-    `INSERT INTO portfolio_snapshots (exchange, total_value, currency) VALUES (?, ?, ?)`,
+    `INSERT INTO portfolio_snapshots (exchange, total_value, currency) VALUES (?, ?, ?)`
   );
 
   for (const row of rows) {
@@ -39,6 +41,8 @@ export async function takeSnapshot(): Promise<void> {
 
       if (exchange === 'binance') {
         totalValue = await getBinanceBalance(apiKey, apiSecret);
+      } else if (exchange === 'bybit') {
+        totalValue = await getBybitBalance(apiKey, apiSecret);
       } else if (exchange === 'bitget') {
         totalValue = await getBitgetBalance(apiKey, apiSecret);
       } else if (exchange === 'okx') {
