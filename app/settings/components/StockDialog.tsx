@@ -18,12 +18,6 @@ import {
 import { Field, FieldGroup } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { cn } from '@/lib/utils';
-
-interface ExchangeDialogProps {
-  exchange: string;
-  isConfigured?: boolean;
-}
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -34,18 +28,19 @@ function SubmitButton() {
   );
 }
 
-export const ExchangeDialog = ({ exchange, isConfigured = false }: ExchangeDialogProps) => {
+export const StockDialog = () => {
   const [open, setOpen] = useState(false);
   const router = useRouter();
 
   const [, action] = useActionState(async (_: unknown, formData: FormData) => {
-    const apiKey = formData.get('api-key') as string;
-    const apiSecret = formData.get('api-secret') as string;
+    const ticker = formData.get('ticker') as string;
+    const shares = parseFloat(formData.get('shares') as string);
+
     try {
-      const res = await fetch('/api/exchange-keys', {
+      const res = await fetch('/api/stock-holdings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ exchange, apiKey, apiSecret }),
+        body: JSON.stringify({ ticker, shares }),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       setOpen(false);
@@ -58,36 +53,38 @@ export const ExchangeDialog = ({ exchange, isConfigured = false }: ExchangeDialo
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button
-          variant="ghost"
-          className={cn('h-auto w-full justify-between rounded-xl border p-4', 'hover:bg-accent')}
-        >
-          <span className="text-sm font-medium">{exchange}</span>
-          <span
-            className={cn('text-xs', isConfigured ? 'text-green-500' : 'text-muted-foreground')}
-          >
-            {isConfigured ? '설정됨' : 'API 미설정'}
-          </span>
+        <Button variant="outline" size="sm">
+          종목 추가
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-sm">
         <form action={action}>
           <DialogHeader>
-            <DialogTitle>{exchange} API 설정</DialogTitle>
-            <DialogDescription>{exchange} API 키와 시크릿을 입력하세요.</DialogDescription>
+            <DialogTitle>주식 종목 추가</DialogTitle>
+            <DialogDescription>
+              보유 종목의 티커와 수량을 입력하세요. (예: AAPL, 005930.KS)
+            </DialogDescription>
           </DialogHeader>
           <FieldGroup className="py-4">
             <Field>
-              <Label htmlFor="api-key">API Key</Label>
-              <Input id="api-key" name="api-key" placeholder="API Key를 입력하세요" />
+              <Label htmlFor="ticker">티커 (Ticker)</Label>
+              <Input
+                id="ticker"
+                name="ticker"
+                placeholder="예: AAPL, 005930.KS"
+                required
+              />
             </Field>
             <Field>
-              <Label htmlFor="api-secret">Secret Key</Label>
+              <Label htmlFor="shares">수량</Label>
               <Input
-                id="api-secret"
-                name="api-secret"
-                type="password"
-                placeholder="Secret Key를 입력하세요"
+                id="shares"
+                name="shares"
+                type="number"
+                min="0"
+                step="any"
+                placeholder="보유 수량"
+                required
               />
             </Field>
           </FieldGroup>

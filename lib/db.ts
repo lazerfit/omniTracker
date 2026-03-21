@@ -24,6 +24,16 @@ function initDb(db: Database): void {
       snapshot_at TEXT NOT NULL DEFAULT (datetime('now'))
     )
   `);
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS stock_holdings (
+      id         INTEGER PRIMARY KEY AUTOINCREMENT,
+      ticker     TEXT NOT NULL,
+      name       TEXT NOT NULL DEFAULT '',
+      shares     REAL NOT NULL,
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    )
+  `);
 }
 
 export async function getDb(): Promise<Database> {

@@ -4,6 +4,8 @@ import { getBinanceBalance } from '@/lib/exchange/binance';
 import { getBitgetBalance } from '@/lib/exchange/bitget';
 import { getBybitBalance } from '@/lib/exchange/bybit';
 import { getOkxBalance } from '@/lib/exchange/okx';
+import { getUpbitBalance, getUsdtKrwRate } from '@/lib/exchange/upbit';
+import { getStockPrice } from '@/lib/stock/yahoo';
 import { NextResponse } from 'next/server';
 
 interface ExchangeKeyRow {
@@ -17,8 +19,23 @@ interface ExchangeKeyRow {
 
 interface ExchangeBalance {
   exchange: string;
-  balance: number;
-  currency: string;
+  balanceKrw: number;
+  error?: string;
+}
+
+interface StockHoldingRow {
+  id: number;
+  ticker: string;
+  name: string;
+  shares: number;
+}
+
+interface StockBalance {
+  ticker: string;
+  name: string;
+  shares: number;
+  priceKrw: number;
+  totalKrw: number;
   error?: string;
 }
 
@@ -31,6 +48,12 @@ export async function GET(): Promise<NextResponse> {
     )
     .all();
 
+  const stockRows = db
+    .query<StockHoldingRow, []>('SELECT id, ticker, name, shares FROM stock_holdings')
+    .all();
+
+  const usdtKrw = await getUsdtKrwRate();
+
   const results: ExchangeBalance[] = await Promise.all(
     rows.map(async (row) => {
       try {
@@ -40,33 +63,63 @@ export async function GET(): Promise<NextResponse> {
         const apiSecret = decrypt(row.api_secret, ivObj.apiSecret, authTagObj.apiSecret);
 
         const exchange = row.exchange.toLowerCase();
-        let balance: number;
+        let balanceKrw: number;
 
         if (exchange === 'binance') {
-          balance = await getBinanceBalance(apiKey, apiSecret);
+          balanceKrw = (await getBinanceBalance(apiKey, apiSecret)) * usdtKrw;
         } else if (exchange === 'bybit') {
-          balance = await getBybitBalance(apiKey, apiSecret);
+          balanceKrw = (await getBybitBalance(apiKey, apiSecret)) * usdtKrw;
         } else if (exchange === 'bitget') {
-          balance = await getBitgetBalance(apiKey, apiSecret);
+          balanceKrw = (await getBitgetBalance(apiKey, apiSecret)) * usdtKrw;
         } else if (exchange === 'okx') {
-          balance = await getOkxBalance(apiKey, apiSecret);
+          balanceKrw = (await getOkxBalance(apiKey, apiSecret)) * usdtKrw;
+        } else if (exchange === 'upbit') {
+          balanceKrw = await getUpbitBalance(apiKey, apiSecret);
         } else {
-          return { exchange: row.exchange, balance: 0, currency: 'USD', error: 'Unsupported exchange' };
+          return { exchange: row.exchange, balanceKrw: 0, error: 'Unsupported exchange' };
         }
 
-        return { exchange: row.exchange, balance, currency: 'USD' };
+        return { exchange: row.exchange, balanceKrw };
       } catch (err) {
         return {
           exchange: row.exchange,
-          balance: 0,
-          currency: 'USD',
+          balanceKrw: 0,
           error: err instanceof Error ? err.message : 'Unknown error',
         };
       }
     }),
   );
 
-  const total = results.reduce((sum, r) => sum + r.balance, 0);
+  const stockResults: StockBalance[] = await Promise.all(
+    stockRows.map(async (row) => {
+      try {
+        const { price, currency, name } = await getStockPrice(row.ticker);
+        const priceKrw = currency === 'KRW' ? price : price * usdtKrw;
+        const totalKrw = priceKrw * row.shares;
+        return {
+          ticker: row.ticker,
+          name: row.name || name,
+          shares: row.shares,
+          priceKrw,
+          totalKrw,
+        };
+      } catch (err) {
+        console.error(`[stock] ${row.ticker} price fetch failed:`, err);
+        return {
+          ticker: row.ticker,
+          name: row.name,
+          shares: row.shares,
+          priceKrw: 0,
+          totalKrw: 0,
+          error: err instanceof Error ? err.message : 'Unknown error',
+        };
+      }
+    }),
+  );
 
-  return NextResponse.json({ total, currency: 'USD', exchanges: results });
+  const exchangeTotal = results.reduce((sum, r) => sum + r.balanceKrw, 0);
+  const stockTotal = stockResults.reduce((sum, r) => sum + r.totalKrw, 0);
+  const total = exchangeTotal + stockTotal;
+
+  return NextResponse.json({ total, currency: 'KRW', exchanges: results, stocks: stockResults });
 }

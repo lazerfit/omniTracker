@@ -26,7 +26,7 @@ const CardBalance = () => {
   }, []);
 
   const formatted = data
-    ? new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(
+    ? new Intl.NumberFormat('ko-KR', { style: 'currency', currency: 'KRW', maximumFractionDigits: 0 }).format(
         data.total,
       )
     : null;
@@ -40,10 +40,7 @@ const CardBalance = () => {
         {loading && <span className="text-muted-foreground text-sm">Loading...</span>}
         {error && <span className="text-destructive text-sm">{error}</span>}
         {formatted && (
-          <>
-            <span className="text-xl font-bold tracking-tight">{formatted}</span>
-            <span className="text-primary/80 ml-2 text-sm">{data!.currency}</span>
-          </>
+          <span className="text-xl font-bold tracking-tight">{formatted}</span>
         )}
       </CardContent>
     </Card>

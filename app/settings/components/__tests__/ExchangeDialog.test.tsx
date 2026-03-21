@@ -55,7 +55,7 @@ describe('ExchangeDialog', () => {
       expect(fetchMock.mock.calls.length).toBe(1);
     });
 
-    const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    const [url, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit];
     expect(url).toBe('/api/exchange-keys');
     expect(init.method).toBe('POST');
     expect(JSON.parse(init.body as string)).toEqual({
