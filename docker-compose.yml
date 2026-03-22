@@ -10,4 +10,8 @@ services:
     environment:
       - ENCRYPTION_KEY=${ENCRYPTION_KEY}
       - DB_PATH=/data/db.sqlite
+      # Optional: pre-configure admin credentials on first run.
+      # If omitted, the first visit will prompt for account setup.
+      # - ADMIN_USERNAME=admin
+      # - ADMIN_PASSWORD=your_secure_password
     restart: unless-stopped

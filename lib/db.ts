@@ -117,5 +117,20 @@ export async function getDb(): Promise<Database> {
   _db = new DB(dbPath, { create: true });
   initDb(_db);
 
+  // Auto-create admin account from env vars on first run
+  const existing = _db.query('SELECT id FROM auth_config LIMIT 1').get();
+  if (!existing) {
+    const adminUser = process.env.ADMIN_USERNAME;
+    const adminPass = process.env.ADMIN_PASSWORD;
+    if (adminUser && adminPass) {
+      const { hashPassword } = await import('./auth');
+      const hash = await hashPassword(adminPass);
+      _db.run('INSERT INTO auth_config (id, username, password_hash) VALUES (1, ?, ?)', [
+        adminUser,
+        hash,
+      ]);
+    }
+  }
+
   return _db;
 }

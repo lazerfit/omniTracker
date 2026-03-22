@@ -13,7 +13,9 @@ export async function middleware(request: NextRequest) {
 
   const token = request.cookies.get(COOKIE_NAME)?.value;
   if (!token || !(await verifySessionToken(token))) {
-    const setupDone = request.cookies.get(SETUP_COOKIE)?.value === '1';
+    const setupDone =
+      request.cookies.get(SETUP_COOKIE)?.value === '1' ||
+      (!!process.env.ADMIN_USERNAME && !!process.env.ADMIN_PASSWORD);
     const redirectPath = setupDone ? '/login' : '/setup';
     return NextResponse.redirect(new URL(redirectPath, request.url));
   }
