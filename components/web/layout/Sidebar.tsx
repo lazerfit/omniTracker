@@ -50,7 +50,9 @@ const Sidebar = () => {
     <aside className="hidden h-full w-50 flex-col items-center border-r p-4 lg:flex">
       <div className="mt-4 flex w-full flex-col gap-1">
         <div className="mb-8 flex items-center justify-center">
-          <span className="text-foreground text-lg font-bold">Om</span>
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-foreground">
+            <span className="text-background text-sm font-bold tracking-tight">OT</span>
+          </div>
         </div>
         {NAV_ITEMS.map((item) => (
           <NavItem key={item.href} href={item.href} label={item.label} icon={item.icon} />
