@@ -2,13 +2,17 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, mock } from 'bun:test';
 
+mock.module('next/navigation', () => ({
+  useRouter: () => ({ push: mock(() => {}), refresh: mock(() => {}) }),
+  usePathname: () => '/',
+}));
+
 import { ExchangeDialog } from '../ExchangeDialog';
 
 const originalFetch = global.fetch;
 
 afterEach(() => {
   global.fetch = originalFetch;
-  mock.restore();
 });
 
 describe('ExchangeDialog', () => {
@@ -20,7 +24,7 @@ describe('ExchangeDialog', () => {
   it('opens dialog when trigger is clicked', async () => {
     render(<ExchangeDialog exchange="Binance" />);
 
-    fireEvent.click(screen.getByRole('button', { name: /Binance/i }));
+    fireEvent.click(screen.getByText('Binance').closest('button')!);
 
     await waitFor(() => {
       expect(screen.getByText('Binance API 설정')).toBeTruthy();
@@ -36,7 +40,7 @@ describe('ExchangeDialog', () => {
     global.fetch = fetchMock as unknown as typeof fetch;
 
     render(<ExchangeDialog exchange="Binance" />);
-    fireEvent.click(screen.getByRole('button', { name: /Binance/i }));
+    fireEvent.click(screen.getByText('Binance').closest('button')!);
 
     await waitFor(() => {
       expect(screen.getByText('Binance API 설정')).toBeTruthy();
@@ -76,7 +80,7 @@ describe('ExchangeDialog', () => {
       global.fetch = mock(() => Promise.resolve(successResponse)) as unknown as typeof fetch;
 
       render(<ExchangeDialog exchange="Binance" />);
-      fireEvent.click(screen.getByRole('button', { name: /Binance/i }));
+      fireEvent.click(screen.getByText('Binance').closest('button')!);
 
       await waitFor(() => {
         expect(screen.getByText('Binance API 설정')).toBeTruthy();
@@ -105,7 +109,7 @@ describe('ExchangeDialog', () => {
     global.fetch = mock(() => new Promise(() => {})) as unknown as typeof fetch;
 
     render(<ExchangeDialog exchange="Binance" />);
-    fireEvent.click(screen.getByRole('button', { name: /Binance/i }));
+    fireEvent.click(screen.getByText('Binance').closest('button')!);
 
     await waitFor(() => {
       expect(screen.getByText('Binance API 설정')).toBeTruthy();
