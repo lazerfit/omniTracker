@@ -46,3 +46,7 @@ GEMINI.md
 /data/*.sqlite
 /data/*.sqlite-shm
 /data/*.sqlite-wal
+
+# user uploads
+/public/uploads/*
+!/public/uploads/.gitkeep
