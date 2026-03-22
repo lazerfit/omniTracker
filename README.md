@@ -17,13 +17,29 @@
 
 ## Self-hosted 배포 (Docker)
 
-### 1. 환경변수 설정
+서버에 소스코드 없이 `docker-compose.yml`과 `.env` 파일만으로 배포할 수 있습니다.
 
-```bash
-cp .env.example .env
+### 1. docker-compose.yml 작성
+
+```yaml
+services:
+  omnitracker:
+    image: ghcr.io/lazerfit/omnitracker:latest
+    container_name: omnitracker
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./data:/data
+      - ./uploads:/app/public/uploads
+    environment:
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY}
+      - DB_PATH=/data/db.sqlite
+    restart: unless-stopped
 ```
 
-`.env` 파일에 암호화 키를 입력합니다. 키는 아래 명령으로 생성합니다.
+### 2. .env 파일 작성
+
+암호화 키를 생성해서 `.env`에 입력합니다.
 
 ```bash
 openssl rand -hex 32
@@ -33,22 +49,28 @@ openssl rand -hex 32
 ENCRYPTION_KEY=여기에_생성된_64자_hex_키_입력
 ```
 
-### 2. 빌드 & 실행
+### 3. 실행
 
 ```bash
-docker compose up -d --build
+docker compose up -d
 ```
 
 브라우저에서 `http://localhost:3000` 접속.
 
-### 3. 데이터 지속성
+### 업데이트
+
+```bash
+docker compose pull && docker compose up -d
+```
+
+### 데이터 지속성
 
 | 호스트 경로 | 컨테이너 경로 | 내용 |
 |------------|--------------|------|
 | `./data`    | `/data`      | SQLite DB |
 | `./uploads` | `/app/public/uploads` | 프로필 사진 |
 
-컨테이너를 재시작하거나 이미지를 재빌드해도 데이터는 유지됩니다.
+컨테이너를 재시작하거나 이미지를 업데이트해도 데이터는 유지됩니다.
 
 ## 로컬 개발
 
