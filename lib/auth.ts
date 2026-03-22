@@ -7,8 +7,8 @@ function toHex(buf: ArrayBuffer): string {
     .join('');
 }
 
-function fromHex(hex: string): Uint8Array {
-  const bytes = new Uint8Array(hex.length / 2);
+function fromHex(hex: string): Uint8Array<ArrayBuffer> {
+  const bytes = new Uint8Array(hex.length / 2) as Uint8Array<ArrayBuffer>;
   for (let i = 0; i < bytes.length; i++) {
     bytes[i] = parseInt(hex.slice(i * 2, i * 2 + 2), 16);
   }
@@ -16,7 +16,7 @@ function fromHex(hex: string): Uint8Array {
 }
 
 export async function hashPassword(password: string): Promise<string> {
-  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const salt = crypto.getRandomValues(new Uint8Array(16)) as Uint8Array<ArrayBuffer>;
   const enc = new TextEncoder();
   const keyMaterial = await crypto.subtle.importKey(
     'raw',
