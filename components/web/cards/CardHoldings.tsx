@@ -88,9 +88,8 @@ const CardHoldings = () => {
       </CardHeader>
       <CardContent>
         {loading && <span className="text-muted-foreground text-sm">Loading...</span>}
-        {error && <span className="text-destructive text-sm">{error}</span>}
-        {!loading && !error && items.length === 0 && (
-          <span className="text-muted-foreground text-sm">보유 종목이 없습니다.</span>
+        {(error || (!loading && !error && items.length === 0)) && (
+          <span className="text-muted-foreground text-sm">API 항목이 입력되지 않았습니다.</span>
         )}
         {items.length > 0 && (
           <div className="flex flex-col gap-1">

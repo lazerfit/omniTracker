@@ -51,9 +51,9 @@ const CardProfit = () => {
       </CardHeader>
       <CardContent>
         {loading && <span className="text-muted-foreground text-sm">Loading...</span>}
-        {error && <span className="text-destructive text-sm">{error}</span>}
+        {error && <span className="text-muted-foreground text-sm">API 항목이 입력되지 않았습니다.</span>}
         {!loading && !error && data?.profit == null && (
-          <span className="text-muted-foreground text-sm">No snapshot data yet</span>
+          <span className="text-muted-foreground text-sm">아직 스냅샷 데이터가 없습니다.</span>
         )}
         {formattedProfit != null && (
           <div className="flex items-baseline gap-2">

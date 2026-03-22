@@ -83,8 +83,17 @@ const CardBalance = () => {
       </CardHeader>
       <CardContent>
         {loading && <span className="text-muted-foreground text-sm">Loading...</span>}
-        {error && <span className="text-destructive text-sm">{error}</span>}
-        {formatted && (
+        {error && (
+          <span className="text-muted-foreground text-sm">
+            API 항목이 입력되지 않았습니다.
+          </span>
+        )}
+        {!loading && !error && data?.total === 0 && (
+          <span className="text-muted-foreground text-sm">
+            API 항목이 입력되지 않았습니다.
+          </span>
+        )}
+        {formatted && data!.total > 0 && (
           <div className="flex flex-col gap-3">
             <span className="text-xl font-bold tracking-tight">{formatted}</span>
 

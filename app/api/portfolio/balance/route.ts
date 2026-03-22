@@ -48,6 +48,7 @@ interface StockBalance {
 }
 
 export async function GET(): Promise<NextResponse> {
+  try {
   const db = await getDb();
 
   const rows = db
@@ -64,7 +65,7 @@ export async function GET(): Promise<NextResponse> {
     .query<CryptoHoldingRow, []>('SELECT id, symbol, name, amount FROM crypto_holdings')
     .all();
 
-  const usdtKrw = await getUsdtKrwRate();
+  const usdtKrw = await getUsdtKrwRate().catch(() => 1400);
 
   const results: ExchangeBalance[] = await Promise.all(
     rows.map(async (row) => {
@@ -156,4 +157,8 @@ export async function GET(): Promise<NextResponse> {
     exchanges: [...results, ...cryptoResults],
     stocks: stockResults,
   });
+  } catch (err) {
+    console.error('[balance] unexpected error:', err);
+    return NextResponse.json({ error: 'internal' }, { status: 500 });
+  }
 }
