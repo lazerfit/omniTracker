@@ -1,6 +1,6 @@
 services:
   omnitracker:
-    build: .
+    image: ghcr.io/lazerfit/omnitracker:latest
     container_name: omnitracker
     ports:
       - "3000:3000"
