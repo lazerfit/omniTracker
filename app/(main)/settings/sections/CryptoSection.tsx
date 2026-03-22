@@ -1,7 +1,7 @@
 import { getDb } from '@/lib/db';
 import { getCoinPrice } from '@/lib/crypto/prices';
-import { CryptoDialog } from '@/app/settings/components/CryptoDialog';
-import { CryptoDeleteButton } from '@/app/settings/components/CryptoDeleteButton';
+import { CryptoDialog } from '@/app/(main)/settings/components/CryptoDialog';
+import { CryptoDeleteButton } from '@/app/(main)/settings/components/CryptoDeleteButton';
 
 interface CryptoHoldingRow {
   id: number;

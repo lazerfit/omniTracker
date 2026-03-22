@@ -4,8 +4,8 @@ import { getStockPrice } from '@/lib/stock/yahoo';
 import { getUsdtKrwRate } from '@/lib/exchange/upbit';
 import Link from 'next/link';
 import RebalancingTab from './RebalancingTab';
-import { StockDialog } from '@/app/settings/components/StockDialog';
-import { StockDeleteButton } from '@/app/settings/components/StockDeleteButton';
+import { StockDialog } from '@/app/(main)/settings/components/StockDialog';
+import { StockDeleteButton } from '@/app/(main)/settings/components/StockDeleteButton';
 
 interface StockHoldingRow {
   id: number;

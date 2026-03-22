@@ -1,4 +1,4 @@
-import { ExchangeDialog } from '@/app/settings/components/ExchangeDialog';
+import { ExchangeDialog } from '@/app/(main)/settings/components/ExchangeDialog';
 import { getDb } from '@/lib/db';
 
 const EXCHANGE_GROUPS = [
