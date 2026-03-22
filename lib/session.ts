@@ -1,9 +1,9 @@
 const COOKIE_NAME = 'omnitracker-session';
 const SESSION_DURATION_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
 
-function hexToBytes(hex: string): Uint8Array {
+function hexToBytes(hex: string): Uint8Array<ArrayBuffer> {
   const len = hex.length / 2;
-  const bytes = new Uint8Array(len);
+  const bytes = new Uint8Array(len) as Uint8Array<ArrayBuffer>;
   for (let i = 0; i < len; i++) {
     bytes[i] = parseInt(hex.slice(i * 2, i * 2 + 2), 16);
   }
