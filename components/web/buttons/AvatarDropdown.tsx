@@ -37,6 +37,11 @@ const AvatarDropdown = () => {
 
   const initials = profile.name.trim() ? profile.name.trim()[0].toUpperCase() : 'U';
 
+  const handleLogout = async () => {
+    await fetch('/api/auth/logout', { method: 'POST' });
+    router.push('/login');
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -56,7 +61,13 @@ const AvatarDropdown = () => {
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem variant="destructive">Log out</DropdownMenuItem>
+          <DropdownMenuItem
+            variant="destructive"
+            className="cursor-pointer"
+            onSelect={() => void handleLogout()}
+          >
+            Log out
+          </DropdownMenuItem>
         </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>
