@@ -33,7 +33,7 @@ const StockSection = async () => {
     .query<StockHoldingRow, []>('SELECT id, ticker, name, shares, avg_price FROM stock_holdings')
     .all();
 
-  const usdtKrw = rows.length > 0 ? await getUsdtKrwRate() : 1;
+  const usdtKrw = rows.length > 0 ? await getUsdtKrwRate().catch(() => 1400) : 1;
 
   const holdings: StockHoldingWithPrice[] = await Promise.all(
     rows.map(async (row) => {
