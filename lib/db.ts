@@ -95,6 +95,14 @@ function initDb(db: Database): void {
     )
   `);
   db.run(`INSERT OR IGNORE INTO profile (id) VALUES (1)`);
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS auth_config (
+      id            INTEGER PRIMARY KEY DEFAULT 1,
+      username      TEXT NOT NULL,
+      password_hash TEXT NOT NULL
+    )
+  `);
 }
 
 export async function getDb(): Promise<Database> {

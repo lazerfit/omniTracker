@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifySessionToken, COOKIE_NAME } from '@/lib/session';
 
-const PUBLIC_PATHS = ['/login', '/api/auth'];
+const PUBLIC_PATHS = ['/login', '/setup', '/api/auth'];
+const SETUP_COOKIE = 'omnitracker-setup';
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -12,8 +13,9 @@ export async function middleware(request: NextRequest) {
 
   const token = request.cookies.get(COOKIE_NAME)?.value;
   if (!token || !(await verifySessionToken(token))) {
-    const url = new URL('/login', request.url);
-    return NextResponse.redirect(url);
+    const setupDone = request.cookies.get(SETUP_COOKIE)?.value === '1';
+    const redirectPath = setupDone ? '/login' : '/setup';
+    return NextResponse.redirect(new URL(redirectPath, request.url));
   }
 
   return NextResponse.next();

@@ -104,8 +104,6 @@ lib/
 |----------|----------|-------------|
 | `ENCRYPTION_KEY` | Yes | 64-char hex (32 bytes). Generate: `openssl rand -hex 32` |
 | `DB_PATH` | No | SQLite file path (default: `./data/db.sqlite`) |
-| `AUTH_USERNAME` | No | Login username (default: `admin`) |
-| `AUTH_PASSWORD` | Yes | Login password (plain text, use HTTPS in production) |
 
 ## Docker
 
