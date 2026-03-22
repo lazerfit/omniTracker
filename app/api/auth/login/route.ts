@@ -17,7 +17,9 @@ export async function POST(request: Request): Promise<NextResponse> {
     .get();
 
   if (!row) {
-    return NextResponse.json({ error: '초기 설정이 완료되지 않았습니다.' }, { status: 503 });
+    const res = NextResponse.json({ error: 'setup_required' }, { status: 503 });
+    res.cookies.set('omnitracker-setup', '', { maxAge: 0, path: '/' });
+    return res;
   }
 
   const usernameMatch = username === row.username;

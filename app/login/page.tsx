@@ -25,6 +25,8 @@ export default function LoginPage() {
       if (res.ok) {
         router.push('/');
         router.refresh();
+      } else if (res.status === 503) {
+        router.replace('/setup');
       } else {
         const data = (await res.json()) as { error: string };
         setError(data.error ?? '로그인에 실패했습니다.');
