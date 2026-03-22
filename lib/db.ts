@@ -31,9 +31,70 @@ function initDb(db: Database): void {
       ticker     TEXT NOT NULL,
       name       TEXT NOT NULL DEFAULT '',
       shares     REAL NOT NULL,
+      avg_price  REAL,
       created_at TEXT NOT NULL DEFAULT (datetime('now'))
     )
   `);
+
+  try {
+    db.run('ALTER TABLE stock_holdings ADD COLUMN avg_price REAL');
+  } catch {
+    // column already exists, ignore
+  }
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS crypto_holdings (
+      id         INTEGER PRIMARY KEY AUTOINCREMENT,
+      symbol     TEXT NOT NULL,
+      name       TEXT NOT NULL DEFAULT '',
+      amount     REAL NOT NULL,
+      avg_price  REAL,
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    )
+  `);
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS rebalance_targets (
+      ticker     TEXT PRIMARY KEY,
+      target_pct REAL NOT NULL DEFAULT 0
+    )
+  `);
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS portfolio_rebalance_targets (
+      asset_key  TEXT PRIMARY KEY,
+      target_pct REAL NOT NULL DEFAULT 0
+    )
+  `);
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS rebalance_presets (
+      id           INTEGER PRIMARY KEY AUTOINCREMENT,
+      name         TEXT NOT NULL,
+      targets_json TEXT NOT NULL,
+      created_at   TEXT NOT NULL DEFAULT (datetime('now'))
+    )
+  `);
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS notifications (
+      id         INTEGER PRIMARY KEY AUTOINCREMENT,
+      title      TEXT NOT NULL,
+      body       TEXT NOT NULL DEFAULT '',
+      read       INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    )
+  `);
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS profile (
+      id          INTEGER PRIMARY KEY DEFAULT 1,
+      name        TEXT NOT NULL DEFAULT '',
+      email       TEXT NOT NULL DEFAULT '',
+      avatar_path TEXT NOT NULL DEFAULT ''
+    )
+  `);
+  db.run(`INSERT OR IGNORE INTO profile (id) VALUES (1)`);
 }
 
 export async function getDb(): Promise<Database> {

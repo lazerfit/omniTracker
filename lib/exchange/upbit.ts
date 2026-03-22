@@ -81,15 +81,6 @@ export async function getUpbitBalance(apiKey: string, apiSecret: string): Promis
 
   const total = krwBalance + nonKrwValue;
 
-  console.log('[Upbit]', {
-    krw: `₩${krwBalance.toLocaleString()}`,
-    nonKrwAssets: nonKrw.map((a) => ({
-      currency: a.currency,
-      amount: parseFloat(a.balance) + parseFloat(a.locked),
-    })),
-    total: `₩${total.toLocaleString()}`,
-  });
-
   return total;
 }
 

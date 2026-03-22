@@ -9,6 +9,7 @@ interface StockHoldingRow {
   ticker: string;
   name: string;
   shares: number;
+  avg_price: number | null;
 }
 
 interface StockHoldingWithPrice extends StockHoldingRow {
@@ -29,7 +30,7 @@ const StockSection = async () => {
   const db = await getDb();
 
   const rows = db
-    .query<StockHoldingRow, []>('SELECT id, ticker, name, shares FROM stock_holdings')
+    .query<StockHoldingRow, []>('SELECT id, ticker, name, shares, avg_price FROM stock_holdings')
     .all();
 
   const usdtKrw = rows.length > 0 ? await getUsdtKrwRate() : 1;
@@ -77,50 +78,61 @@ const StockSection = async () => {
                   : holding.price * usdtKrw
                 : null;
             const totalKrw = priceKrw != null ? priceKrw * holding.shares : null;
+            const avgPriceKrw =
+              holding.avg_price != null
+                ? isKrw
+                  ? holding.avg_price
+                  : holding.avg_price * usdtKrw
+                : null;
+            const profitKrw =
+              avgPriceKrw != null && priceKrw != null
+                ? (priceKrw - avgPriceKrw) * holding.shares
+                : null;
+            const profitPct =
+              avgPriceKrw != null && priceKrw != null
+                ? ((priceKrw - avgPriceKrw) / avgPriceKrw) * 100
+                : null;
 
             return (
-              <div
-                key={holding.id}
-                className="flex items-center justify-between rounded-xl border px-4 py-3"
-              >
-                <div className="flex min-w-0 flex-1 items-center gap-3">
-                  <span className="shrink-0 text-sm font-bold">{holding.ticker}</span>
-                  <span className="text-muted-foreground truncate text-sm">{holding.resolvedName}</span>
-                </div>
-
-                <div className="flex shrink-0 items-center gap-4">
-                  <span className="text-muted-foreground text-sm">
-                    {holding.shares.toLocaleString('ko-KR')}주
+              <div key={holding.id} className="rounded-xl border px-4 py-3">
+                {/* Row 1: ticker + name + action buttons */}
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-bold">{holding.ticker}</span>
+                  <span className="text-muted-foreground min-w-0 flex-1 truncate text-sm">
+                    {holding.resolvedName}
                   </span>
-
-                  <div className="min-w-[120px] text-right">
-                    {holding.price != null && holding.currency != null ? (
-                      <>
-                        <div className="text-sm font-medium">
-                          {isKrw
-                            ? formatKrw(holding.price)
-                            : formatUsd(holding.price)}
-                        </div>
-                        {!isKrw && priceKrw != null && (
-                          <div className="text-muted-foreground text-xs">
-                            {formatKrw(priceKrw)}
-                          </div>
-                        )}
-                      </>
-                    ) : (
-                      <span className="text-muted-foreground text-sm">-</span>
-                    )}
+                  <div className="flex shrink-0 items-center">
+                    <StockDialog
+                      mode="edit"
+                      initialData={{
+                        id: holding.id,
+                        ticker: holding.ticker,
+                        name: holding.resolvedName,
+                        shares: holding.shares,
+                        avgPrice: holding.avg_price,
+                      }}
+                    />
+                    <StockDeleteButton id={holding.id} />
                   </div>
-
-                  <div className="min-w-[120px] text-right">
-                    {totalKrw != null ? (
-                      <span className="text-sm font-medium">{formatKrw(totalKrw)}</span>
-                    ) : (
-                      <span className="text-muted-foreground text-sm">-</span>
-                    )}
-                  </div>
-
-                  <StockDeleteButton id={holding.id} />
+                </div>
+                {/* Row 2: shares + price + total + profit */}
+                <div className="text-muted-foreground mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
+                  <span>{holding.shares.toLocaleString('ko-KR')}주</span>
+                  {holding.price != null && holding.currency != null && (
+                    <span>
+                      현재가 {isKrw ? formatKrw(holding.price) : formatUsd(holding.price)}
+                    </span>
+                  )}
+                  {totalKrw != null && (
+                    <span className="text-foreground font-medium">{formatKrw(totalKrw)}</span>
+                  )}
+                  {profitKrw != null && holding.avg_price != null && profitPct != null && (
+                    <span className={profitKrw >= 0 ? 'text-green-500' : 'text-red-500'}>
+                      {profitKrw >= 0 ? '+' : ''}
+                      {formatKrw(profitKrw)} ({profitPct >= 0 ? '+' : ''}
+                      {profitPct.toFixed(2)}%)
+                    </span>
+                  )}
                 </div>
               </div>
             );

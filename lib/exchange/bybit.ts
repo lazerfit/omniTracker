@@ -76,12 +76,5 @@ export async function getBybitBalance(apiKey: string, apiSecret: string): Promis
 
   const total = unifiedTotal + fundTotal;
 
-  console.log('[Bybit]', {
-    unified: `$${unifiedTotal}`,
-    fund: `$${fundTotal}`,
-    fundCoins: fundCoins.map((c) => ({ ...c, usdValue: `$${c.usdValue}` })),
-    total: `$${total}`,
-  });
-
   return total;
 }

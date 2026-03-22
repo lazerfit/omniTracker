@@ -44,10 +44,5 @@ export async function getBitgetBalance(apiKey: string, apiSecret: string): Promi
     total += parseFloat(asset.usdtValuation);
   }
 
-  console.log('[Bitget]', {
-    assets: data.data.map((a) => ({ coin: a.coinName, usdtValuation: `$${a.usdtValuation}` })),
-    total: `$${total}`,
-  });
-
   return total;
 }

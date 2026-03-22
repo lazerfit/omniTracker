@@ -1,0 +1,13 @@
+services:
+  omnitracker:
+    build: .
+    container_name: omnitracker
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./data:/data                      # SQLite database
+      - ./uploads:/app/public/uploads     # Profile avatar uploads
+    environment:
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY}
+      - DB_PATH=/data/db.sqlite
+    restart: unless-stopped

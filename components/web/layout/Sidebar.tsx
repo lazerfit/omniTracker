@@ -1,16 +1,60 @@
-import { buttonVariants } from '@/components/ui/button';
+'use client';
+
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import {
+  IconLayoutDashboard,
+  IconChartBar,
+  IconCurrencyBitcoin,
+  IconAdjustments,
+  IconSettings,
+} from '@tabler/icons-react';
+import { cn } from '@/lib/utils';
+
+const NAV_ITEMS = [
+  { href: '/', label: 'Dashboard', icon: IconLayoutDashboard },
+  { href: '/stocks', label: 'Stocks', icon: IconChartBar },
+  { href: '/crypto', label: 'Crypto', icon: IconCurrencyBitcoin },
+  { href: '/rebalancing', label: 'Rebalancing', icon: IconAdjustments },
+  { href: '/settings', label: 'Settings', icon: IconSettings },
+];
+
+interface NavItemProps {
+  href: string;
+  label: string;
+  icon: React.ComponentType<{ size?: number; className?: string }>;
+}
+
+function NavItem({ href, label, icon: Icon }: NavItemProps) {
+  const pathname = usePathname();
+  const isActive = href === '/' ? pathname === '/' : pathname.startsWith(href);
+
+  return (
+    <Link
+      href={href}
+      className={cn(
+        'flex w-full flex-col items-center gap-1 rounded-xl px-2 py-2.5 transition-colors',
+        isActive
+          ? 'bg-primary/10 text-foreground font-medium'
+          : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground',
+      )}
+    >
+      <Icon size={20} />
+      <span className="text-xs">{label}</span>
+    </Link>
+  );
+}
 
 const Sidebar = () => {
   return (
     <aside className="hidden h-full w-50 flex-col items-center border-r p-4 lg:flex">
-      <div className="mt-4 flex flex-col">
-        <button>Om</button>
-        <div className="mt-12 flex flex-col items-center rounded-xl">
-          <Link href={'/'} className={buttonVariants({ variant: 'ghost' })}>
-            Dashboard
-          </Link>
+      <div className="mt-4 flex w-full flex-col gap-1">
+        <div className="mb-8 flex items-center justify-center">
+          <span className="text-foreground text-lg font-bold">Om</span>
         </div>
+        {NAV_ITEMS.map((item) => (
+          <NavItem key={item.href} href={item.href} label={item.label} icon={item.icon} />
+        ))}
       </div>
     </aside>
   );

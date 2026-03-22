@@ -6,6 +6,7 @@ import { getBybitBalance } from '@/lib/exchange/bybit';
 import { getOkxBalance } from '@/lib/exchange/okx';
 import { getUpbitBalance, getUsdtKrwRate } from '@/lib/exchange/upbit';
 import { getStockPrice } from '@/lib/stock/yahoo';
+import { getCoinPrice } from '@/lib/crypto/prices';
 import { NextResponse } from 'next/server';
 
 interface ExchangeKeyRow {
@@ -30,6 +31,13 @@ interface StockHoldingRow {
   shares: number;
 }
 
+interface CryptoHoldingRow {
+  id: number;
+  symbol: string;
+  name: string;
+  amount: number;
+}
+
 interface StockBalance {
   ticker: string;
   name: string;
@@ -50,6 +58,10 @@ export async function GET(): Promise<NextResponse> {
 
   const stockRows = db
     .query<StockHoldingRow, []>('SELECT id, ticker, name, shares FROM stock_holdings')
+    .all();
+
+  const cryptoRows = db
+    .query<CryptoHoldingRow, []>('SELECT id, symbol, name, amount FROM crypto_holdings')
     .all();
 
   const usdtKrw = await getUsdtKrwRate();
@@ -117,9 +129,31 @@ export async function GET(): Promise<NextResponse> {
     }),
   );
 
-  const exchangeTotal = results.reduce((sum, r) => sum + r.balanceKrw, 0);
-  const stockTotal = stockResults.reduce((sum, r) => sum + r.totalKrw, 0);
-  const total = exchangeTotal + stockTotal;
+  const cryptoResults: ExchangeBalance[] = await Promise.all(
+    cryptoRows.map(async (row) => {
+      try {
+        const { price } = await getCoinPrice(row.symbol);
+        const balanceKrw = price * row.amount * usdtKrw;
+        return { exchange: row.name || row.symbol, balanceKrw };
+      } catch (err) {
+        return {
+          exchange: row.name || row.symbol,
+          balanceKrw: 0,
+          error: err instanceof Error ? err.message : 'Unknown error',
+        };
+      }
+    }),
+  );
 
-  return NextResponse.json({ total, currency: 'KRW', exchanges: results, stocks: stockResults });
+  const exchangeTotal = results.reduce((sum, r) => sum + r.balanceKrw, 0);
+  const cryptoManualTotal = cryptoResults.reduce((sum, r) => sum + r.balanceKrw, 0);
+  const stockTotal = stockResults.reduce((sum, r) => sum + r.totalKrw, 0);
+  const total = exchangeTotal + cryptoManualTotal + stockTotal;
+
+  return NextResponse.json({
+    total,
+    currency: 'KRW',
+    exchanges: [...results, ...cryptoResults],
+    stocks: stockResults,
+  });
 }

@@ -1,3 +1,4 @@
+@import url('https://cdn.jsdelivr.net/gh/wanteddev/wanted-sans@v1.0.3/packages/wanted-sans/fonts/webfonts/variable/split/WantedSansVariable.min.css');
 @import 'tailwindcss';
 @import 'tw-animate-css';
 
@@ -44,9 +45,16 @@
   ::file-selector-button {
     border-color: var(--border, currentColor);
   }
+
+  body {
+    font-family: var(--font-sans);
+  }
 }
 
 :root {
+  /* Font */
+  --font-sans: 'Wanted Sans Variable', 'Wanted Sans', sans-serif;
+
   /* Layout & Base */
   --radius: 0.75em;
   --background: #f7f7f7;
