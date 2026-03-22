@@ -4,7 +4,7 @@ import { verifySessionToken, COOKIE_NAME } from '@/lib/session';
 const PUBLIC_PATHS = ['/login', '/setup', '/api/auth'];
 const SETUP_COOKIE = 'omnitracker-setup';
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (PUBLIC_PATHS.some((p) => pathname.startsWith(p))) {
